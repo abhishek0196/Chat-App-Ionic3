@@ -17,21 +17,23 @@ import { ChatProvider } from '../../providers/chat/chat';
   templateUrl: 'chats.html',
 })
 export class ChatsPage {
-  myrequests;
-  myfriends;
+  myrequests = [];
+  myfriends = [];
   constructor(public navCtrl: NavController, public navParams: NavParams, public requestservice: RequestsProvider,
               public events: Events, public alertCtrl: AlertController, public chatservice: ChatProvider,private userservice:UserProvider) {
   }
 
-
   ionViewWillEnter() {
-    this.userservice.getuserdetails();
+  
     this.requestservice.getmyrequests();
     this.requestservice.getmyfriends();
     this.myfriends = [];
-    this.events.subscribe('gotrequests', () => {
+    this.myrequests = [];
+    this.events.subscribe('requests', () => {
+      
       this.myrequests = [];
       this.myrequests = this.requestservice.userdetails;
+     
     })
     this.events.subscribe('friends', () => {
       this.myfriends = [];
@@ -40,14 +42,18 @@ export class ChatsPage {
   }
 
   ionViewDidLeave() {
-    this.events.unsubscribe('gotrequests');
+    this.events.unsubscribe('requests');
     this.events.unsubscribe('friends');
   }
+ 
+
+  
   addbuddy() {
     this.navCtrl.push('BuddiesPage');
   }
-  accept(item) {
-    this.requestservice.acceptrequest(item).then(() => {
+  accept(docid:string,senderid:string,receiverid:string) {
+    
+    this.requestservice.acceptrequest(docid,senderid,receiverid).then(() => {
       
       let newalert = this.alertCtrl.create({
         title: 'Friend added',
@@ -57,16 +63,20 @@ export class ChatsPage {
       newalert.present();
     })
   }
-  ignore(item) {
-    this.requestservice.updaterequest(item).then(() => {
-
-    }).catch((err) => {
-      alert(err);
+  ignore(docid:string) {
+    this.requestservice.declinerequest(docid).then(() => {
+      let newalert = this.alertCtrl.create({
+        title: 'Invitation Rejected',
+        subTitle: 'You Can Search For More Friends',
+        buttons: ['Okay']
+      });
+      newalert.present();
     })
   }
 
-  buddychat(buddy) {
-    this.chatservice.initializebuddy(buddy);
+  buddychat(docid:string,senderid:string,receiverid:string,displayName :string,photoURL:string) {
+    
+    this.chatservice.initializebuddy(docid,senderid,receiverid,displayName,photoURL);
 
     this.navCtrl.parent.parent.push('BuddychatPage');
   }

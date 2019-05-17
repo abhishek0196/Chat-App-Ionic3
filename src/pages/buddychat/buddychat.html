@@ -13,25 +13,25 @@
 
 
 <ion-content #content>
-<div class = "chatwindow">
-  <ion-list no-lines>
-    <ion-item *ngFor = "let item of allmessages; let i = index" text-wrap>
-      <ion-avatar item-left *ngIf="item.sentby === buddy.uid">
+    <div class = "chatwindow">
+      <ion-list no-lines>
+        <ion-item *ngFor = "let item of allmessages; let i = index" text-wrap>
+          <ion-avatar item-left *ngIf="item.senderid != buddy.senderId">
         <img src="{{buddy.photoURL}}">
       </ion-avatar>
-      <div class="bubble me" *ngIf="item.sentby === buddy.uid">
+      <div class="bubble me" *ngIf="item.senderid != buddy.senderId">
         <h3>{{item.message}}</h3>
-      </div>
-      <ion-avatar item-right *ngIf="item.sentby != buddy.uid">
+     </div>
+      <ion-avatar item-right *ngIf="item.senderid === buddy.senderId">
         <img src="{{photoURL}}">
       </ion-avatar>
-      <div class="bubble you" *ngIf="item.sentby != buddy.uid">
+      <div class="bubble you" *ngIf="item.senderid === buddy.senderId">
         <h3>{{item.message}}</h3>
-      </div>
-    </ion-item>
-  </ion-list>
-</div>
-</ion-content>
+          </div>
+        </ion-item>
+      </ion-list>
+    </div>
+    </ion-content>
 <ion-footer ion-fixed>    
   <ion-toolbar class="no-border" color="white">        
     <ion-input [(ngModel)]="newmessage" placeholder="Write your message ..."></ion-input>  

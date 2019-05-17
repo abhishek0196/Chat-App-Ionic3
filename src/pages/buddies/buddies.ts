@@ -19,8 +19,13 @@ export class BuddiesPage {
               private requestservice:RequestsProvider) {
                 // console.log(this.userservice.getallusers());
     this.userservice.getallusers().then((res: any) => {
+      
       this.filteredusers = res;
       this.temparr = res;
+      if(this.temparr.length === 0)
+      {
+        alert("No Frirends To Show");
+      }
    })
   }
 

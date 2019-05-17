@@ -1,3 +1,4 @@
+import { CollectionsProvider } from './../collections/collections';
 import { Injectable } from '@angular/core';
 import { Events } from 'ionic-angular';
 import { connreq } from '../../models/interfaces/request';
@@ -13,29 +14,25 @@ import firebase from 'firebase';
 */
 @Injectable()
 export class RequestsProvider {
-  // firereq = firebase.database().ref('/requests');
-  // firefriends = firebase.database().ref('/friends');
+
   db = firebase.firestore();
-  collectionName = "requests";
+
   
-  userdetails;
-  myfriends;
-  constructor(public userservice: UserProvider, public events: Events) {
+  userdetails = [];
+  myfriends = [];
+  constructor(public userservice: UserProvider, public events: Events,private collectionName:CollectionsProvider) {
     
   }
 
   sendrequest(req: connreq) {
     var promise = new Promise((resolve, reject) => {
-      this.db.collection(this.collectionName).add({
+      this.db.collection(this.collectionName.requestCollection).add({
           receiver_id:req.recipient,
           sender_id:req.sender,
           status:"Pending"
       })
 
-    //   this.firereq.child(req.recipient).push().set({
-    //   sender: req.sender,
-    //   status : "PENDING"
-    //   })
+    
     .then(() => {
         resolve({ success: true });
         }).catch((err) => {
@@ -44,103 +41,193 @@ export class RequestsProvider {
     })
     return promise;  
   }
+  acceptrequest(docid:string,senderid:string,receiverid:string) {
+   
+    var promise = new Promise((resolve, reject) => {
+      this.myfriends = [];
+      
+      this.db.collection(this.collectionName.requestCollection).doc(docid).update({
+        status:"Accepted"
+      }).then(()=>
+      {
+          this.db.collection(this.collectionName.friendsCollection).add({
+            user1:senderid,
+            user2:receiverid
+          }).then(()=>{
+            resolve(true);
+          }).catch((err) => {
+                  reject(err);
+                 })
 
-   getmyrequests() {
-  //   let allmyrequests;
-  //   var myrequests = [];
-
-  //   this.firereq.child(firebase.auth().currentUser.uid).on('value', (snapshot) => {
-  //     allmyrequests = snapshot.val();
-  //     myrequests = [];
-  //     for (var i in allmyrequests) {
-  //       myrequests.push(allmyrequests[i].sender);
-  //     }
-  //     // this.userservice.getallusers().then((res) => {
-  //     //   var allusers = res;
-  //     //   this.userdetails = [];
-  //     //   for (var j in myrequests)
-  //     //     for (var key in allusers) {
-  //     //       if (myrequests[j] === allusers[key].uid) {
-  //     //         this.userdetails.push(allusers[key]);
-  //     //       }
-  //     //     }
-  //     //   this.events.publish('gotrequests');
-  //     // })
-
-  // })
-  }  
-
-   acceptrequest(buddy) {
-  //   var promise = new Promise((resolve, reject) => {
-  //     this.myfriends = [];
-  //     this.firefriends.child(firebase.auth().currentUser.uid).push().set({
-  //       uid: buddy.uid
-  //     }).then(() => {
-  //       this.firefriends.child(buddy.uid).push().set({
-  //         uid: firebase.auth().currentUser.uid
-  //       }).then(() => {
-  //         this.updaterequest(buddy).then(() => {
-  //         resolve(true);
-  //       })
-        
-  //       }).catch((err) => {
-  //         reject(err);
-  //        })
-  //       }).catch((err) => {
-  //         reject(err);
-  //     })
-  //   })
-  //   return promise;
-   }
-
-   updaterequest(buddy) {
-  //   var promise = new Promise((resolve, reject) => {
-  //    this.firereq.child(firebase.auth().currentUser.uid).orderByChild('sender').equalTo(buddy.uid).once('value', (snapshot) => {
-  //         let somekey;
-  //         for (var key in snapshot.val())
-  //           somekey = key;
-  //         this.firereq.child(firebase.auth().currentUser.uid).child(somekey).remove().then(() => {
-  //           resolve(true);
-  //         })
-  //        })
-  //         .then(() => {
-          
-  //       }).catch((err) => {
-  //         reject(err);
-  //       })
-  //   })
-  //   return promise; 
-   }
-
-   getmyfriends() {
-  //   let friendsuid = [];
-  //   this.firefriends.child(firebase.auth().currentUser.uid).on('value', (snapshot) => {
-  //     let allfriends = snapshot.val();
-  //     this.myfriends = [];
-  //     for (var i in allfriends)
-  //       friendsuid.push(allfriends[i].uid);
-        
-  //     // this.userservice.getallusers().then((users) => {
-  //     //   this.myfriends = [];
-  //     //   for (var j in friendsuid)
-  //     //     for (var key in users) {
-  //     //       if (friendsuid[j] === users[key].uid) {
-  //     //         this.myfriends.push(users[key]);
-  //     //       }
-  //     //     }
-  //     //   this.events.publish('friends');
-  //     // }).catch((err) => {
-  //     //   alert(err);
-  //     // })
-    
-  //  })
-   }  
-      getReceiver(){
+          }).catch((err) => {
+            alert(err);
+           })
+      });
+      
+    return promise;
   
-  //   console.log((firebase.auth().currentUser.uid));
-  //   this.firereq.orderByChild(firebase.auth().currentUser.uid).on('value',(snapshot) =>
-  //   {
-  //     console.log(snapshot.val());
-  //   })
+    
    }
+
+   declinerequest(docid:string) {
+      var promise = new Promise((resolve, reject) => {
+    this.myfriends = [];
+    
+    this.db.collection(this.collectionName.requestCollection).doc(docid).update({
+      status:"Rejected"
+    })
+          .then(() => {
+          
+        }).catch((err) => {
+          reject(err);
+        })
+    })
+    return promise; 
+   }
+
+  getmyfriends() 
+  {
+    var self = this;
+    var data = [];
+    var senderQuery = this.db.collection(this.collectionName.usersCollection);
+    this.db.collection(this.collectionName.friendsCollection).where("user1" ,"==",firebase.auth().currentUser.uid)
+    .onSnapshot(user1Snapshot =>
+    {
+      data = [];
+      if(user1Snapshot.empty)
+      {
+        this.db.collection(this.collectionName.friendsCollection).where("user2" ,"==",firebase.auth().currentUser.uid)
+        .onSnapshot(user2Snapshot =>
+        {
+          data = [];
+          if(user2Snapshot.empty)
+          {
+
+          }
+          else
+          {
+           user2Snapshot.forEach(user2doc =>
+            {
+              let filterSenderQuery = senderQuery.where("uid","==",user2doc.data().user1)
+              filterSenderQuery.onSnapshot(senderSnapshot =>
+              {
+                
+                if(senderSnapshot.empty)
+                {
+                  console.log("why? user2")
+                }
+                else
+                {
+                 
+                  senderSnapshot.forEach(senderDoc=>
+                  {
+                    data.push({
+                    docid :user2doc.id,
+                    displayName :senderDoc.data().displayName,
+                    photoURL : senderDoc.data().photoURL,
+                    senderid : user2doc.data().user2,
+                    receiverid : user2doc.data().user1 
+                    })
+                  })
+                 
+                }
+              })
+              self.myfriends = data;
+              this.events.publish('friends'); 
+            })
+          } 
+        })
+      }
+      else
+      {
+        user1Snapshot.forEach(user1doc =>
+        {
+          
+          let filterSenderQuery = senderQuery.where("uid","==",user1doc.data().user2)
+          filterSenderQuery
+          .onSnapshot(senderSnapshot =>
+          {
+            if(senderSnapshot.empty)
+            {
+              console.log("why? user1")
+            }
+            else
+            {
+              
+              senderSnapshot.forEach(senderDoc=>
+              {
+                
+                  data.push(
+                  {
+                    docid :user1doc.id,
+                    displayName :senderDoc.data().displayName,
+                    photoURL : senderDoc.data().photoURL,
+                    senderid : user1doc.data().user1,
+                    receiverid : user1doc.data().user2 
+                  })
+              })
+              console.log("user1",this.myfriends);
+            }
+          })
+          self.myfriends = data;
+          this.events.publish('friends'); 
+        })
+      }
+    })
+  }  
+   
+  getmyrequests() 
+  {
+    var self = this;
+    var data = [];
+    var senderQuery = this.db.collection(this.collectionName.usersCollection);
+    data = [];
+    this.db.collection(this.collectionName.requestCollection)
+    .where("receiver_id", "==",firebase.auth().currentUser.uid).where("status", "==", "Pending")
+    .onSnapshot(requestSnapshot =>
+    {
+      data = [];
+      if(requestSnapshot.empty)
+      {
+        
+      }
+      else
+      {
+        requestSnapshot.forEach(requestDoc=>
+        {
+          let filterSenderQuery = senderQuery.where("uid","==",requestDoc.data().sender_id)
+          filterSenderQuery.onSnapshot(senderSnapshot =>
+          {
+            
+            if(senderSnapshot.empty)
+            {
+              console.log("why?")
+            }
+            else
+            {
+              senderSnapshot.forEach(senderDoc=>
+                {
+                  data.push(
+                  {
+                    docid :requestDoc.id,
+                    displayName :senderDoc.data().displayName,
+                    photoURL : senderDoc.data().photoURL,
+                    senderid: requestDoc.data().sender_id,
+                    receiverid : requestDoc.data().receiver_id
+                  })
+                    
+                }) 
+               
+              }
+            })
+            
+          })           
+      }
+      self.userdetails = data;
+      console.log("kaiswe",this.userdetails);  
+      self.events.publish("requests");
+    })
+  }
+
 }
+

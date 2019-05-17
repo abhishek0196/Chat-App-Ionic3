@@ -19,8 +19,11 @@ import { UserProvider } from '../providers/user/user';
 import { ImghandlerProvider } from '../providers/imghandler/imghandler';
 import { RequestsProvider } from '../providers/requests/requests';
 import { ChatProvider } from '../providers/chat/chat';
-import firebase from 'firebase';
 
+import { CollectionsProvider } from '../providers/collections/collections';
+import * as firebase from 'firebase'
+
+firebase.initializeApp(config);
 @NgModule({
   declarations: [
     MyApp
@@ -46,7 +49,10 @@ import firebase from 'firebase';
     UserProvider,
     ImghandlerProvider,
     RequestsProvider,
-    ChatProvider
+    ChatProvider,
+    CollectionsProvider
   ]
 })
-export class AppModule {}
+export class AppModule {
+ 
+}

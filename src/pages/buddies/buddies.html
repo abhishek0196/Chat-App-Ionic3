@@ -9,6 +9,9 @@
 
 <ion-content>
   <ion-searchbar [(ngModel)]="searchstring" (input)="searchuser($event)" (ionClear)="reset()" placeholder="Search"></ion-searchbar>
+  <!-- <ion-alert *ngIf="filteredusers.length == 0">
+    {{No Buddies To Show!!}}
+  </ion-alert> -->
 <ion-list no-lines>
   <ion-list>
     <ion-item-sliding *ngFor="let key of filteredusers">
@@ -29,4 +32,5 @@
     </ion-item-sliding>
   </ion-list>
 </ion-list>
+
 </ion-content>

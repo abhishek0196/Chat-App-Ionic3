@@ -1,3 +1,4 @@
+import { CollectionsProvider } from './../collections/collections';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
 import firebase from 'firebase';
@@ -16,10 +17,10 @@ export class UserProvider {
   docId:string;
   firedata = firebase.database().ref('/users');
   firereq = firebase.database().ref('/requests');
-  collectionName:string = "users";
-  requestCollection:string = "requests"
+
   constructor(public afireauth: AngularFireAuth,
-    public firestore: AngularFirestore) {
+    public firestore: AngularFirestore,
+    private collectionName:CollectionsProvider) {
   
   }
 
@@ -31,7 +32,7 @@ export class UserProvider {
           displayName: newuser.displayName,
           photoURL: 'https://cdn.pixabay.com/photo/2015/03/04/22/35/head-659652__340.png'
         }).then(() => {
-          this.db.collection(this.collectionName).add({
+          this.db.collection(this.collectionName.usersCollection).add({
             uid: this.afireauth.auth.currentUser.uid,
             displayName: newuser.displayName,
             photoURL: "https://cdn.pixabay.com/photo/2015/03/04/22/35/head-659652__340.png"
@@ -66,7 +67,7 @@ export class UserProvider {
   }
   getuserdetails() {
     var promise = new Promise((resolve, reject) => {
-      this.db.collection(this.collectionName).where('uid', '==', firebase.auth().currentUser.uid).get() .then(snapshot => {
+      this.db.collection(this.collectionName.usersCollection).where('uid', '==', firebase.auth().currentUser.uid).get() .then(snapshot => {
         if (snapshot.empty) {
           console.log('No matching documents.');
           return;
@@ -95,7 +96,7 @@ export class UserProvider {
             displayName: this.afireauth.auth.currentUser.displayName,
             photoURL: imageurl      
         }).then(() => {
-          this.db.collection(this.collectionName).where('uid', '==', firebase.auth().currentUser.uid).get().then(snapshot => {
+          this.db.collection(this.collectionName.usersCollection).where('uid', '==', firebase.auth().currentUser.uid).get().then(snapshot => {
             if (snapshot.empty) {
               console.log('No matching documents.');
               return;
@@ -110,7 +111,7 @@ export class UserProvider {
           .catch(err => {
             console.log('Error getting documents', err);
           });
-          this.db.collection(this.collectionName).doc(this.docId).update({
+          this.db.collection(this.collectionName.usersCollection).doc(this.docId).update({
             displayName: this.afireauth.auth.currentUser.displayName,
             photoURL: imageurl,
             uid: firebase.auth().currentUser.uid
@@ -140,7 +141,7 @@ export class UserProvider {
       displayName: newname,
       photoURL: this.afireauth.auth.currentUser.photoURL
     }).then(() => {
-      this.db.collection(this.collectionName).where('uid', '==', firebase.auth().currentUser.uid).get().then(snapshot => {
+      this.db.collection(this.collectionName.usersCollection).where('uid', '==', firebase.auth().currentUser.uid).get().then(snapshot => {
         if (snapshot.empty) {
           console.log('No matching documents.');
           return;
@@ -149,7 +150,7 @@ export class UserProvider {
         snapshot.forEach(doc => {
           this.docId = doc.id;
          
-          this.db.collection(this.collectionName).doc(this.docId).update({
+          this.db.collection(this.collectionName.usersCollection).doc(this.docId).update({
             displayName:  newname,
             photoURL:  this.afireauth.auth.currentUser.photoURL,
             uid: firebase.auth().currentUser.uid
@@ -180,8 +181,8 @@ export class UserProvider {
 
   getallusers() {
     var promise = new Promise((resolve, reject) => {
-      this.db.collection(this.collectionName).get().then(userSnapshot => { 
-        this.db.collection(this.requestCollection).get().then(requestSnapshot =>{
+      this.db.collection(this.collectionName.usersCollection).get().then(userSnapshot => { 
+        this.db.collection(this.collectionName.requestCollection).get().then(requestSnapshot =>{
                 let arr = [];
                 if(requestSnapshot.empty)
                 {
