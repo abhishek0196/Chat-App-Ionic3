@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { usercreds } from '../../models/interfaces/usercreds';
 import { ToastController } from 'ionic-angular';
-
+import firebase from 'firebase'
 
 /*
   Generated class for the AuthProvider provider.
@@ -29,14 +29,18 @@ async presentToast() {
   toast.present();
 }
   login(credentials: usercreds) {
+  
     var promise = new Promise((resolve) => {
-      this.afireauth.auth.signInWithEmailAndPassword(credentials.email, credentials.password).then(() => {
-        resolve(true);
-      }).catch((err) => {
-          this.presentToast();
-        
-       })
-    })
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() =>{
+        this.afireauth.auth.signInWithEmailAndPassword(credentials.email, credentials.password).then(() => {
+          resolve(true);
+        }).catch((err) => {
+            this.presentToast();
+          
+         })
+        })  
+      })
+    
 
     return promise;
     

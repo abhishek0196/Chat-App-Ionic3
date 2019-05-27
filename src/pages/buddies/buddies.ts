@@ -17,15 +17,12 @@ export class BuddiesPage {
   constructor(public navCtrl: NavController, public navParams: NavParams,
               public userservice: UserProvider,private alertCtrl :AlertController,
               private requestservice:RequestsProvider) {
-                // console.log(this.userservice.getallusers());
+               // console.log(this.userservice.getallusers());
     this.userservice.getallusers().then((res: any) => {
       
       this.filteredusers = res;
       this.temparr = res;
-      if(this.temparr.length === 0)
-      {
-        alert("No Frirends To Show");
-      }
+   
    })
   }
 

@@ -23,12 +23,14 @@ export class LoginPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad LoginPage');
+    console.log("hello");
   }
 
   signin() {
+   
     this.presentLoading();
     this.authservice.login(this.credentials).then((res: any) => {
+      console.log("resss",res);
       if (!res.code)
         this.navCtrl.setRoot('TabsPage');
       else

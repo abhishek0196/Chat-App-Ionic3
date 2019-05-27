@@ -24,6 +24,7 @@ export class ChatProvider {
     photoURL : ""
   };
   buddymessages = [];
+  lastResult = "";
   constructor(public events: Events,
     private collectionName:CollectionsProvider) {
     
@@ -48,9 +49,12 @@ export class ChatProvider {
             senderid : this.buddy.senderId,
             receiverid: this.buddy.receiverId,
             message : msg,
-            timestamp :  firebase.database.ServerValue.TIMESTAMP
+            created: new Date()
+            // created: firebase.firestore.FieldValue.serverTimestamp()
+
           })
           .then(() => {
+            
             resolve(true);
             }).catch((err) => {
               reject(err);
@@ -75,34 +79,98 @@ export class ChatProvider {
     }
   }
 
-  getbuddymessages() {
-    this.buddymessages = [];
-    this.db.collection(this.collectionName.friendsCollection).doc(this.buddy.docid).collection(this.collectionName.chatsCollection).get().then(snapshot=> {
-      if(snapshot.empty)
-      {
-        console.log("First Chat");
-      }
-      else{
-        snapshot.forEach(msgDoc =>{
-           this.buddymessages.push({
-            senderid : msgDoc.data().senderid,
-            message : msgDoc.data().message})
-        })
-        console.log("messages",this.buddymessages);
-        this.events.publish('newmessage');
-      }
-    }).catch((err) => {
-      alert(err);
-     })
-  //   let temp;
-  //   this.firebuddychats.child(firebase.auth().currentUser.uid).child(this.buddy.uid).on('value', (snapshot) => {
-  //     this.buddymessages = [];
-  //     temp = snapshot.val();
-  //     for (var tempkey in temp) {
-  //       this.buddymessages.push(temp[tempkey]);
+  // getbuddymessages() {
+  //   let skip = this;
+  //   var query ;
+  //   if(skip.lastResult === '')
+  //   {
+  //       query =  this.db.collection(this.collectionName.friendsCollection).doc(this.buddy.docid)
+  //       .collection(this.collectionName.chatsCollection).orderBy('created').limit(5);
+  //   }
+  //   else{
+  //     query =  this.db.collection(this.collectionName.friendsCollection).doc(this.buddy.docid)
+  //     .collection(this.collectionName.chatsCollection).orderBy('created').startAfter(skip.lastResult).limit(5);
+  //   }
+    
+  //    query.onSnapshot(snapshot=> {
+  //      skip.buddymessages = [];
+  //      if(snapshot.empty)
+  //      { 
+  //        console.log("First Chat");
+  //      }
+  //      else{
+  //        if(snapshot.docs.length > 0){
+  //       var last = snapshot.docs[snapshot.docs.length - 1];
+  //        snapshot.forEach(msgDoc =>{
+  //           skip.buddymessages.push({
+  //            senderid : msgDoc.data().senderid,
+  //            message : msgDoc.data().message})
+  //        })
+  //        skip.lastResult = last;
+  //       }
+  //      }
+  //      console.log(skip.buddymessages);
+  //      this.events.publish('newmessage');
+       
+  //    })
+  //  }
+  // getbuddymessages() {
+  //  let skip = this;
+  //   this.db.collection(this.collectionName.friendsCollection).doc(this.buddy.docid)
+  //   .collection(this.collectionName.chatsCollection).orderBy('created')
+  //   .onSnapshot(snapshot=> {
+  //     skip.buddymessages = [];
+  //     if(snapshot.empty)
+  //     {
+  //       console.log("First Chat");
   //     }
+  //     else{
+  //       snapshot.forEach(msgDoc =>{
+  //          skip.buddymessages.push({
+  //           senderid : msgDoc.data().senderid,
+  //           message : msgDoc.data().message})
+  //       })
+  //     }
+  //     console.log(skip.buddymessages);
   //     this.events.publish('newmessage');
   //   })
+  // }
+  getbuddymessages() {
+    let skip = this;
+    skip.buddymessages = [];
+     this.db.collection(this.collectionName.friendsCollection).doc(this.buddy.docid)
+     .collection(this.collectionName.chatsCollection).orderBy('created')
+     .onSnapshot(snapshot=> {
+     console.log("before",skip.buddymessages.length);
+       if(snapshot.empty)
+       {
+         console.log("First Chat");
+       }
+       else{
+        //  console.log("size",snapshot.size)
+         snapshot.docChanges.forEach(msgDoc => {
+           
+           if (msgDoc.type === 'added') {
+             console.log('New : ', msgDoc.doc.data());
+             skip.buddymessages.push({
+              senderid : msgDoc.doc.data().senderid,
+              message : msgDoc.doc.data().message
+            })
+              
+           }
+          //  if (change.type === 'modified') {
+          //    console.log('Modified : ', change.doc.data());
+          //  }
+          //  if (change.type === 'removed') {
+          //    console.log('Removed : ', change.doc.data());
+          //  }
+         });
+       }
+       console.log("After",skip.buddymessages.length);
+       //console.log(skip.buddymessages);
+       this.events.publish('newmessage');
+     })
    }
+   
 
 }

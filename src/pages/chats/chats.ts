@@ -3,8 +3,8 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, Events, AlertController } from 'ionic-angular';
 import { RequestsProvider } from '../../providers/requests/requests';
 import { ChatProvider } from '../../providers/chat/chat';
-
-
+import firebase from 'firebase';
+ 
 /**
  * Generated class for the ChatsPage page.
  *
@@ -23,23 +23,68 @@ export class ChatsPage {
               public events: Events, public alertCtrl: AlertController, public chatservice: ChatProvider,private userservice:UserProvider) {
   }
 
-  ionViewWillEnter() {
-  
-    this.requestservice.getmyrequests();
-    this.requestservice.getmyfriends();
-    this.myfriends = [];
-    this.myrequests = [];
-    this.events.subscribe('requests', () => {
+  ionViewDidLoad() {
+    
+    firebase.auth().onAuthStateChanged((user) =>
+    {
       
-      this.myrequests = [];
-      this.myrequests = this.requestservice.userdetails;
-     
+      if(!user)
+      {
+        console.log("hell00");
+        this.navCtrl.setRoot("LoginPage");
+      }
+      else{
+        var id:string = firebase.auth().currentUser.uid;
+        this.requestservice.getmyrequests(id);
+        this.requestservice.getmyfriends(id);
+        this.myfriends = [];
+        this.myrequests = [];
+        this.events.subscribe('requests', () => {
+          
+          this.myrequests = [];
+          this.myrequests = this.requestservice.userdetails;
+         
+        })
+        this.events.subscribe('friends', () => {
+          this.myfriends = [];
+          this.myfriends = this.requestservice.myfriends; 
+        })
+      }
     })
-    this.events.subscribe('friends', () => {
-      this.myfriends = [];
-      this.myfriends = this.requestservice.myfriends; 
-    })
+      
+ 
   }
+  // ionViewWillEnter() {
+    
+  //   firebase.auth().onAuthStateChanged((user) =>
+  //   {
+      
+  //     if(!user)
+  //     {
+  //       console.log("hell00");
+  //       this.navCtrl.setRoot("LoginPage");
+  //     }
+  //     else{
+  //       var id:string = firebase.auth().currentUser.uid;
+  //       this.requestservice.getmyrequests(id);
+  //       this.requestservice.getmyfriends(id);
+  //       this.myfriends = [];
+  //       this.myrequests = [];
+  //       this.events.subscribe('requests', () => {
+          
+  //         this.myrequests = [];
+  //         this.myrequests = this.requestservice.userdetails;
+         
+  //       })
+  //       this.events.subscribe('friends', () => {
+  //         this.myfriends = [];
+  //         this.myfriends = this.requestservice.myfriends; 
+  //       })
+  //     }
+  //   })
+      
+ 
+  // }
 
   ionViewDidLeave() {
     this.events.unsubscribe('requests');
@@ -75,10 +120,7 @@ export class ChatsPage {
   }
 
   buddychat(docid:string,senderid:string,receiverid:string,displayName :string,photoURL:string) {
-    
-    this.chatservice.initializebuddy(docid,senderid,receiverid,displayName,photoURL);
-
+   this.chatservice.initializebuddy(docid,senderid,receiverid,displayName,photoURL);
     this.navCtrl.parent.parent.push('BuddychatPage');
   }
-
 }

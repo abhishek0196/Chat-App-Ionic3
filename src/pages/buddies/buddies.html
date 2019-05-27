@@ -14,6 +14,7 @@
   </ion-alert> -->
 <ion-list no-lines>
   <ion-list>
+    <ion-item *ngIf="filteredusers.length == 0"> No Friends To Add</ion-item>
     <ion-item-sliding *ngFor="let key of filteredusers">
       <ion-item >
         <ion-avatar item-left>

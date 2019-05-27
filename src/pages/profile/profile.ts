@@ -40,6 +40,7 @@ export class ProfilePage {
       buttons: ['okay']
     });
     this.imghandler.uploadimage().then((url: any) => {
+      console.log("Edit Image:"+url)
       this.userservice.updateimage(url).then((res: any) => {
         if (res.success) {
           statusalert.setTitle('Updated');

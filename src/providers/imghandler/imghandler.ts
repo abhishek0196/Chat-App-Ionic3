@@ -40,6 +40,7 @@ export class ImghandlerProvider {
                   var imageStore = this.firestore.ref('/profileimages').child(firebase.auth().currentUser.uid);
                   imageStore.put(imgBlob).then((res) => {
                     this.firestore.ref('/profileimages').child(firebase.auth().currentUser.uid).getDownloadURL().then((url) => {
+                      console.log("Image Handler"+url);
                       resolve(url);
                     }).catch((err) => {
                         reject(err);

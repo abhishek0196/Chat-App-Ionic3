@@ -32,30 +32,38 @@ export class BuddychatPage {
   constructor(public navCtrl: NavController, public navParams: NavParams, public chatservice: ChatProvider,
               public events: Events, public zone: NgZone) {
     this.buddy = this.chatservice.buddy;
-    alert("SenderID: buddy wala"+this.buddy.senderId);
+ 
 
     this.photoURL = firebase.auth().currentUser.photoURL;
     this.scrollto();
-    this.allmessages = [];
-    this.allmessages = this.chatservice.buddymessages;
-    // this.events.subscribe('newmessage', () => {
-    //   this.allmessages = [];
-    //   this.zone.run(() => {
-    //     this.allmessages = this.chatservice.buddymessages;
+    // 
+    // this.allmessages = this.chatservice.buddymessages;
+  
+    this.events.subscribe('newmessage', () => {
+      this.allmessages = [];
+      this.zone.run(() => {
+        this.allmessages = this.chatservice.buddymessages;
       
-    //   })
-    // })
+      })
+    })
+  }
+ 
+  ionViewDidEnter(){
+    this.chatservice.getbuddymessages();
   }
 
   addmessage() {
-    this.chatservice.addnewmessage(this.newmessage).then(() => {
+    var msg = this.newmessage ;
+    this.newmessage = '';
+
+    this.chatservice.addnewmessage(msg).then(() => {
       this.content.scrollToBottom();
-      this.newmessage = '';
+      
     })
   }
 
-  ionViewDidEnter() {
-    this.chatservice.getbuddymessages();
+  ionViewWillLeave(){
+   this.events.unsubscribe('newmessage');
   }
 
   scrollto() {

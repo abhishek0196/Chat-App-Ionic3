@@ -23,6 +23,7 @@
   <ion-list-header>
     Requests
   </ion-list-header>
+  <!-- <ion-item  *ngIf= "myrequests.length == 0"> No Pending Requests</ion-item> -->
   <ion-item-sliding *ngFor="let item of myrequests">
     <ion-item>
     <ion-avatar item-left>
@@ -44,7 +45,7 @@
   <ion-list-header>
     Friends
   </ion-list-header>
-
+  <!-- <ion-item *ngIf= "myfriends.length == 0"> Try Sending Friend Requests</ion-item> -->
  
   <ion-item *ngFor="let item of myfriends" (click)="buddychat(item.docid,item.senderid,item.receiverid,item.displayName,item.photoURL)">
     <ion-avatar item-left>
@@ -53,5 +54,6 @@
     </ion-avatar>
     <h3>{{item.displayName}}</h3>
   </ion-item>
+
 </ion-list>
 </ion-content>

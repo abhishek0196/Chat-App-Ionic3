@@ -113,7 +113,7 @@ export class UserProvider {
           });
           this.db.collection(this.collectionName.usersCollection).doc(this.docId).update({
             displayName: this.afireauth.auth.currentUser.displayName,
-            photoURL: imageurl,
+            photoURL: this.afireauth.auth.currentUser.photoURL,
             uid: firebase.auth().currentUser.uid
           })
         //     firebase.database().ref('/users/' + firebase.auth().currentUser.uid).update({

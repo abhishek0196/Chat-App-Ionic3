@@ -85,18 +85,18 @@ export class RequestsProvider {
     return promise; 
    }
 
-  getmyfriends() 
+  getmyfriends(id:string) 
   {
     var self = this;
     var data = [];
     var senderQuery = this.db.collection(this.collectionName.usersCollection);
-    this.db.collection(this.collectionName.friendsCollection).where("user1" ,"==",firebase.auth().currentUser.uid)
+    this.db.collection(this.collectionName.friendsCollection).where("user1" ,"==",id)
     .onSnapshot(user1Snapshot =>
     {
       data = [];
       if(user1Snapshot.empty)
       {
-        this.db.collection(this.collectionName.friendsCollection).where("user2" ,"==",firebase.auth().currentUser.uid)
+        this.db.collection(this.collectionName.friendsCollection).where("user2" ,"==",id)
         .onSnapshot(user2Snapshot =>
         {
           data = [];
@@ -176,14 +176,14 @@ export class RequestsProvider {
     })
   }  
    
-  getmyrequests() 
+  getmyrequests(id:string) 
   {
     var self = this;
     var data = [];
     var senderQuery = this.db.collection(this.collectionName.usersCollection);
     data = [];
     this.db.collection(this.collectionName.requestCollection)
-    .where("receiver_id", "==",firebase.auth().currentUser.uid).where("status", "==", "Pending")
+    .where("receiver_id", "==",id).where("status", "==", "Pending")
     .onSnapshot(requestSnapshot =>
     {
       data = [];
