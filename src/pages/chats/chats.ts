@@ -23,34 +23,52 @@ export class ChatsPage {
               public events: Events, public alertCtrl: AlertController, public chatservice: ChatProvider,private userservice:UserProvider) {
   }
 
-  ionViewDidLoad() {
-    
-    firebase.auth().onAuthStateChanged((user) =>
-    {
+  ionViewWillEnter(){
+   
+    var id:string = firebase.auth().currentUser.uid;
+    this.userservice.updateOnline(true);
+    this.requestservice.getmyrequests();
+    this.requestservice.getmyfriends();
+    this.myfriends = [];
+    this.myrequests = [];
+    this.events.subscribe('requests', () => {
       
-      if(!user)
-      {
-        console.log("hell00");
-        this.navCtrl.setRoot("LoginPage");
-      }
-      else{
-        var id:string = firebase.auth().currentUser.uid;
-        this.requestservice.getmyrequests(id);
-        this.requestservice.getmyfriends(id);
-        this.myfriends = [];
-        this.myrequests = [];
-        this.events.subscribe('requests', () => {
-          
-          this.myrequests = [];
-          this.myrequests = this.requestservice.userdetails;
-         
-        })
-        this.events.subscribe('friends', () => {
-          this.myfriends = [];
-          this.myfriends = this.requestservice.myfriends; 
-        })
-      }
+      this.myrequests = [];
+      this.myrequests = this.requestservice.userdetails;
+     
     })
+    this.events.subscribe('friends', () => {
+      console.log("id"+id+"  friends"+this.myfriends);
+      this.myfriends = [];
+      this.myfriends = this.requestservice.myfriends; 
+    })
+    // firebase.auth().onAuthStateChanged((user) =>
+    // {
+      
+    //   if(!user)
+    //   {
+    //     console.log("hell00");
+    //     this.navCtrl.setRoot("LoginPage");
+    //   }
+    //   else{
+    //     var id:string = firebase.auth().currentUser.uid;
+    //     this.userservice.updateOnline(true,id);
+    //     this.requestservice.getmyrequests(id);
+    //     this.requestservice.getmyfriends(id);
+    //     this.myfriends = [];
+    //     this.myrequests = [];
+    //     this.events.subscribe('requests', () => {
+          
+    //       this.myrequests = [];
+    //       this.myrequests = this.requestservice.userdetails;
+         
+    //     })
+    //     this.events.subscribe('friends', () => {
+    //       this.myfriends = [];
+    //       this.myfriends = this.requestservice.myfriends; 
+    //     })
+    //   }
+    // })
       
  
   }

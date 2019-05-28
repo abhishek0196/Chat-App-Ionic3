@@ -1,3 +1,4 @@
+import { UserProvider } from './../../providers/user/user';
 import { messages } from './../../models/interfaces/messages';
 import { Component, ViewChild, NgZone } from '@angular/core';
 import { IonicPage, NavController, NavParams, Events, Content } from 'ionic-angular';
@@ -29,8 +30,13 @@ export class BuddychatPage {
   newmessage;
   allmessages = [];
   photoURL;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public chatservice: ChatProvider,
-              public events: Events, public zone: NgZone) {
+  online;
+  constructor(public navCtrl: NavController,
+              public navParams: NavParams, 
+              public chatservice: ChatProvider,
+              public events: Events, 
+              public zone: NgZone,
+              private userpro:UserProvider) {
     this.buddy = this.chatservice.buddy;
  
 
@@ -46,10 +52,17 @@ export class BuddychatPage {
       
       })
     })
+    this.events.subscribe("online",() => {
+      console.log("online",this.online);
+      this.online = this.userpro.online;
+    })
   }
  
   ionViewDidEnter(){
     this.chatservice.getbuddymessages();
+ 
+    this.userpro.getOnline(this.buddy.receiverId);
+
   }
 
   addmessage() {

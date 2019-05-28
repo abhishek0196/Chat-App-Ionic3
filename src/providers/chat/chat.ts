@@ -51,8 +51,7 @@ export class ChatProvider {
             message : msg,
             created: new Date()
             // created: firebase.firestore.FieldValue.serverTimestamp()
-
-          })
+         })
           .then(() => {
             
             resolve(true);
