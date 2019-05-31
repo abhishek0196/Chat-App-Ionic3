@@ -39,23 +39,39 @@ export class BuddychatPage {
               private userpro:UserProvider) {
     this.buddy = this.chatservice.buddy;
  
-
+               
     this.photoURL = firebase.auth().currentUser.photoURL;
     this.scrollto();
     // 
     // this.allmessages = this.chatservice.buddymessages;
   
-    this.events.subscribe('newmessage', () => {
-      this.allmessages = [];
-      this.zone.run(() => {
-        this.allmessages = this.chatservice.buddymessages;
-      
-      })
-    })
+    
     this.events.subscribe("online",() => {
       console.log("online",this.online);
       this.online = this.userpro.online;
     })
+  }
+  ionViewWillEnter(){
+      this.events.subscribe('newmessage', () => {
+     
+      this.zone.run(() => {
+        
+        this.chatservice.buddymessages.forEach(msg =>{
+          this.allmessages.push({
+            senderid :msg.senderid,
+            message : msg.message,
+          })
+
+        })
+        console.log("msg",this.allmessages);
+        console.log("length ",this.allmessages.length);
+        // if(this.chatservice.buddymessages.length === 1)
+        // {
+        // console.log("chat length",this.chatservice.buddymessages.senderid);
+        
+        // }
+      })
+    }) 
   }
  
   ionViewDidEnter(){
@@ -64,8 +80,21 @@ export class BuddychatPage {
     this.userpro.getOnline(this.buddy.receiverId);
 
   }
+  // newLine()
+  // {
+   
+  //   if(this.newmessage != undefined && this.newmessage.trim() != '')
 
+  //     if(this.newmessage.length > 30)
+  //     {
+  //       console.log("beefore",this.newmessage);
+  //       this.newmessage = this.newmessage + "\n";
+  //       console.log("after",this.newmessage);
+  //     }
+  // }
   addmessage() {
+    if(this.newmessage != undefined && this.newmessage.trim() != '')
+{
     var msg = this.newmessage ;
     this.newmessage = '';
 
@@ -73,6 +102,7 @@ export class BuddychatPage {
       this.content.scrollToBottom();
       
     })
+  }
   }
 
   ionViewWillLeave(){

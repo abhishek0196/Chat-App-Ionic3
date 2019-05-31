@@ -47,32 +47,17 @@ export class ChatProvider {
 
           this.db.collection(this.collectionName.friendsCollection).doc(this.buddy.docid).collection(this.collectionName.chatsCollection).add({
             senderid : this.buddy.senderId,
-            receiverid: this.buddy.receiverId,
+           
             message : msg,
             created: new Date()
-            // created: firebase.firestore.FieldValue.serverTimestamp()
-         })
+          })
           .then(() => {
             
             resolve(true);
             }).catch((err) => {
               reject(err);
           })
-        // this.firebuddychats.child(firebase.auth().currentUser.uid).child(this.buddy.uid).push({
-        //   sentby: firebase.auth().currentUser.uid,
-        //   message: msg,
-        //   timestamp: firebase.database.ServerValue.TIMESTAMP
-        // }).then(() => {
-        //   this.firebuddychats.child(this.buddy.uid).child(firebase.auth().currentUser.uid).push().set({
-        //     sentby: firebase.auth().currentUser.uid,
-        //     message: msg,
-        //     timestamp: firebase.database.ServerValue.TIMESTAMP
-        //   }).then(() => {
-        //     resolve(true);
-        //     }).catch((err) => {
-        //       reject(err);
-        //   })
-        // })
+      
       })
       return promise;
     }
@@ -136,10 +121,12 @@ export class ChatProvider {
   // }
   getbuddymessages() {
     let skip = this;
-    skip.buddymessages = [];
+    
+ 
      this.db.collection(this.collectionName.friendsCollection).doc(this.buddy.docid)
      .collection(this.collectionName.chatsCollection).orderBy('created')
      .onSnapshot(snapshot=> {
+      skip.buddymessages = [];
      console.log("before",skip.buddymessages.length);
        if(snapshot.empty)
        {
@@ -148,8 +135,10 @@ export class ChatProvider {
        else{
         //  console.log("size",snapshot.size)
          snapshot.docChanges.forEach(msgDoc => {
-           
-           if (msgDoc.type === 'added') {
+          var source = msgDoc.doc.metadata.hasPendingWrites ? "Local" : "Server";
+          
+          console.log(source);
+           if (msgDoc.type === 'added'  ) {
              console.log('New : ', msgDoc.doc.data());
              skip.buddymessages.push({
               senderid : msgDoc.doc.data().senderid,

@@ -93,121 +93,66 @@ export class RequestsProvider {
    and then if user1 is the currently logged in user then fecthing the details of user2 
    from the users collection and then displaying itin user1's friends section.
    */
-  getmyfriends() 
+  
+  getmyfriends()
   {
     var self = this;
-    var data = [];
     var id:string = firebase.auth().currentUser.uid;
-    var senderQuery = this.db.collection(this.collectionName.usersCollection);
-    //Getting the friends / user ids of the firends with the currently logged in user.
-    //checking if user1 has the same id as the currently logged in user.
-    this.db.collection(this.collectionName.friendsCollection).where("user1" ,"==",id)
-    .onSnapshot(user1Snapshot =>
-    {
-      data = [];
-      //if the snapshot results empty then we are checkng if  user1 has the same id as the currently logged in user.
-      if(user1Snapshot.empty)
+    var data = [];
+    var userQuery = self.db.collection(self.collectionName.usersCollection);
+    self.db.collection(self.collectionName.friendsCollection)
+    .onSnapshot(friendsSnapshot =>
       {
-        this.db.collection(this.collectionName.friendsCollection).where("user2" ,"==",id)
-        .onSnapshot(user2Snapshot =>
-        {
-          data = [];
-          //Even after checking, if the snapshot is empty that means , that the currently logged in user has no friends.
-          if(user2Snapshot.empty)
-          {
-
-          }
-          //now we are fetching the details of the other user who is friend with the currently logged in user.
-          else
-          {
-           user2Snapshot.forEach(user2doc =>
-            {
-              
-              let filterSenderQuery = senderQuery.where("uid","==",user2doc.data().user1)
-              filterSenderQuery.onSnapshot(senderSnapshot =>
+          friendsSnapshot.docChanges.forEach(friendsDoc =>{
+            var source = friendsDoc.doc.metadata.hasPendingWrites ? "Local" : "Server";
+          
+            console.log(source);
+           
+              if(id === friendsDoc.doc.data().user1 && friendsDoc.type === 'added')
               {
+                userQuery.where("uid","==",friendsDoc.doc.data().user2).get()
+                .then(userSnapshot => {
+                  userSnapshot.forEach(userDoc =>{
+                   // console.log(" user1 display name",userDoc.data().displayName);
+                    data.push({
+                      docid :friendsDoc.doc.id,
+                      displayName :userDoc.data().displayName,
+                      photoURL : userDoc.data().photoURL,
+                      senderid : friendsDoc.doc.data().user2,
+                      receiverid : friendsDoc.doc.data().user1 
+                    })
+                  })
+                })
                 
-                if(senderSnapshot.empty)
-                {
-                  console.log("why? user2")
-                }
-                else
-                {
-                 
-                  senderSnapshot.docChanges.forEach(senderDoc=>
-                  {
-                    console.log(senderDoc);
-                    if (senderDoc.type === 'added') {
-                      data.push({
-                        docid :user2doc.id,
-                        displayName :senderDoc.doc.data().displayName,
-                        photoURL : senderDoc.doc.data().photoURL,
-                        senderid : user2doc.data().user2,
-                        receiverid : user2doc.data().user1 
-                      })
-                    }
-                  })
-
-                 
-                }
-              })
-
-              self.myfriends = data;
-              this.events.publish('friends'); 
-            })
-          } 
-        })
-      }
-      else
-      {
-        //now we are fetching the details of the other user who is friend with the currently logged in user.
-        user1Snapshot.forEach(user1doc =>
-        {
-          
-          let filterSenderQuery = senderQuery.where("uid","==",user1doc.data().user2)
-          filterSenderQuery
-          .onSnapshot(senderSnapshot =>
-          {
-            if(senderSnapshot.empty)
-            {
-              console.log("why? user1")
-            }
-            else
-            {
-              
-              senderSnapshot.docChanges.forEach(senderDoc=>
+              }
+              if(id === friendsDoc.doc.data().user2 && friendsDoc.type === 'added')
               {
-                if(senderDoc.type == 'added')
-                {
-                  console.log(senderDoc);
-                  data.push(
-                  {
-                    docid :user1doc.id,
-                    displayName :senderDoc.doc.data().displayName,
-                    photoURL : senderDoc.doc.data().photoURL,
-                    senderid : user1doc.data().user1,
-                    receiverid : user1doc.data().user2 
+                userQuery.where("uid","==",friendsDoc.doc.data().user1).get()
+                .then(userSnapshot => {
+                  userSnapshot.forEach(userDoc =>{
+                    // console.log(" user2 display name",userDoc.data().displayName);
+                    data.push({
+                      docid :friendsDoc.doc.id,
+                      displayName :userDoc.data().displayName,
+                      photoURL : userDoc.data().photoURL,
+                      senderid : friendsDoc.doc.data().user1,
+                      receiverid : friendsDoc.doc.data().user2 
+                    })
                   })
-                }
-              })
-              console.log("user1",this.myfriends);
-            }
+                })
+              }
+              
           })
-          
           self.myfriends = data;
-          this.events.publish('friends'); 
-        })
-      }
-    })
-  }  
-   
+              this.events.publish('friends');
+      })
+  }
   getmyrequests() 
   {
     var self = this;
     var data = [];
     var id:string = firebase.auth().currentUser.uid;
     var senderQuery = this.db.collection(this.collectionName.usersCollection);
-    data = [];
     this.db.collection(this.collectionName.requestCollection)
     .where("receiver_id", "==",id).where("status", "==", "Pending")
     .onSnapshot(requestSnapshot =>

@@ -26,6 +26,7 @@ export class ChatsPage {
   ionViewWillEnter(){
    
     var id:string = firebase.auth().currentUser.uid;
+    console.log("only id: ",id)
     this.userservice.updateOnline(true);
     this.requestservice.getmyrequests();
     this.requestservice.getmyfriends();
@@ -38,9 +39,11 @@ export class ChatsPage {
      
     })
     this.events.subscribe('friends', () => {
-      console.log("id"+id+"  friends"+this.myfriends);
+
+    
       this.myfriends = [];
       this.myfriends = this.requestservice.myfriends; 
+      console.log("id"+id+"  friends"+this.myfriends.length);
     })
     // firebase.auth().onAuthStateChanged((user) =>
     // {

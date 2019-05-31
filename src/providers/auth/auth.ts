@@ -40,10 +40,7 @@ async presentToast() {
          })
         })  
       })
-    
-
-    return promise;
-    
+    return promise;    
   }
 
 }
